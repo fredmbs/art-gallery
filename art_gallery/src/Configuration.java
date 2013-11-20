@@ -1,5 +1,5 @@
 /**
- * Distributed Voronoi Diagram
+ * Distributed Art-Gallery
  *
  *  @author Frederico Martins Biber Sampaio
  *

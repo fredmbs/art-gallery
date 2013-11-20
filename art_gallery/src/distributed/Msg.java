@@ -1,5 +1,5 @@
 /**
- * Distributed Voronoi Diagram
+ * Distributed Art-Gallery
  *
  *  @author Frederico Martins Biber Sampaio
  *
@@ -25,6 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE. 
 */
+
 package distributed;
 import daj.Message;
 

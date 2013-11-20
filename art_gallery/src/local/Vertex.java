@@ -1,5 +1,5 @@
 /**
- * Distributed Art Gallery Problem
+ * Distributed Art-Gallery
  *
  *  @author Frederico Martins Biber Sampaio
  *
@@ -25,6 +25,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE. 
 */
+
 package local;
 
 public class Vertex {
