@@ -28,7 +28,7 @@
 
 package local;
 public class Edge {
-    private Vertex v0, v1;
+    protected Vertex v0, v1;
 
     public Edge(Vertex v1, Vertex v2) {
         this.v0 = v1;
@@ -39,6 +39,16 @@ public class Edge {
 
     public Vertex getV1() { return v1; }
 
+    private double side(Vertex v2) {
+        return (((v1.x-v0.x)*(v2.y-v0.y))-((v1.y-v0.y)*(v2.x-v0.x)));
+    }
+    
+    public boolean intersect(Edge other) {
+    	boolean vice  = (this.side(other.v0) * this.side(other.v1)) < 0.0;
+    	boolean versa = (other.side(this.v0) * other.side(this.v1)) < 0.0;
+    	return vice && versa;
+    }
+    
     @Override
     public String toString() {
         return "Edge [v0=" + v0 + ", v1=" + v1 + "]";

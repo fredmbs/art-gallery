@@ -42,12 +42,16 @@ public class Triangle {
         this.v2 = v2;
     }
 
-    static private double direction(Vertex v0, Vertex v1, Vertex v2) {
+    static private double side(Vertex v0, Vertex v1, Vertex v2) {
         return (((v1.x-v0.x)*(v2.y-v0.y))-((v1.y-v0.y)*(v2.x-v0.x)));
     }
 
     public boolean inCCW() {
-        return direction(v0, v1, v2) < EPSILON;
+        return side(v0, v1, v2) < EPSILON;
+    }
+    
+    static public boolean inCCW(Edge e, Vertex v) {
+        return side(e.v0, e.v1, v) < EPSILON;
     }
     
     public boolean hasVertexInside(Collection<Vertex> vertexes) {
@@ -58,9 +62,9 @@ public class Triangle {
     }
     
     public boolean inCollision(Vertex p) {
-        boolean d0 = direction(p, v0, v1) < 0.0;
-        boolean d1 = direction(p, v1, v2) < 0.0;
-        boolean d2 = direction(p, v2, v0) < 0.0;
+        boolean d0 = side(p, v0, v1) < 0.0;
+        boolean d1 = side(p, v1, v2) < 0.0;
+        boolean d2 = side(p, v2, v0) < 0.0;
         return ((d0 == d1) && (d1 == d2));
     }
     

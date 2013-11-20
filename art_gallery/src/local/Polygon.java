@@ -38,6 +38,7 @@ public class Polygon implements Iterable<Vertex> {
     // Counter-Clock Wise order!
     private ArrayList<Vertex> pointsInOrder;
     private ArrayList<Edge> diagonals;
+    private ArrayList<Edge> sides;
     
     private int minColor = 0;
 
@@ -47,6 +48,7 @@ public class Polygon implements Iterable<Vertex> {
         pointsInOrder = new ArrayList<Vertex>();
         pointsInOrder.add(first);
         diagonals = new ArrayList<Edge>();
+        sides = new ArrayList<Edge>();
     }
     
     public int size() {
@@ -96,6 +98,39 @@ public class Polygon implements Iterable<Vertex> {
                     pointsInOrder.get(q).getX() * pointsInOrder.get(p).getY();
         }
         return area * 0.5d;
+    }    
+    
+    private boolean testIntersection(Vertex v00, Vertex v01, Vertex v10, Vertex v11) {
+    	Edge e0 = new Edge(v00, v01);
+    	Edge e1 = new Edge(v10, v11);
+    	return e0.intersect(e1);    	
+    }
+    
+    private Edge makeDiagonal(Vertex v, int i) {
+    	Edge diag = new Edge(v, pointsInOrder.get(i));
+    	for (Edge side: sides)
+    		if (diag.intersect(side)) 
+    			return null;
+        //if (Triangle.inCCW(diag, pointsInOrder.get(i+1)))
+        	return diag;
+        //return null;
+    }
+    
+    public void test()
+    {
+        int n = pointsInOrder.size();
+        sides.clear();
+        for(int p = n - 1, q = 0; q < n; p = q++) {
+            sides.add(new Edge(pointsInOrder.get(p), pointsInOrder.get(q)));
+        }
+        n--;
+        diagonals.clear();
+        Edge diag;
+        Vertex v = pointsInOrder.get(0);
+        for (int i = 2; i < n; i++) {
+        	if ((diag = makeDiagonal(v, i)) != null)  
+        		diagonals.add(diag);
+        }
     }    
     
     // Ref: www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
@@ -170,6 +205,7 @@ public class Polygon implements Iterable<Vertex> {
         t.coloring();
         countColors();
         triangulated = true;
+        test();
         return triangulated;
     }
     
@@ -199,7 +235,7 @@ public class Polygon implements Iterable<Vertex> {
             if (minCount > colorCount[i]) {
                 minColor = i;
                 minCount = colorCount[i];
-            } else if ((minCount == colorCount[i]) && (minColor > 1)) {
+            } else if ((minCount == colorCount[i]) && (minColor > i)) {
                 minColor = i;
             }
     }

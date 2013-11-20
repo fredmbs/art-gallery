@@ -47,7 +47,7 @@ public class ArtGalleryVisual extends ArtGallery {
 
     final static Color processColor[] = { Color.BLACK, 
         Color.RED, Color.GREEN, Color.BLUE };
-    final static Color diagonalColor = new Color(1.0f, 1.0f, 0.0f, 0.5f);
+    final static Color diagonalColor = Color.YELLOW; //new Color(1.0f, 1.0f, 0.0f, 0.5f);
     final static Color galleryColor = Color.BLACK;
     
     private java.awt.Polygon visualPolygon;
