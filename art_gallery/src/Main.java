@@ -28,6 +28,8 @@
 // ----------------------------------------------------------------------
 import javax.swing.JDialog;
 
+import local.Vertex;
+
 import visualization.ArtGalleryApp;
 import visualization.ArtGalleryVisualFactory;
 import daj.Application;
@@ -105,6 +107,9 @@ public class Main extends Application {
         case 1:
             simpleGallery();
             break;
+        case 2:
+            gallery2();
+            break;
         default:
             System.exit(1);
         }
@@ -173,6 +178,37 @@ public class Main extends Application {
         for (int i=0; i < 41; i++)
             edge(nodes[i], nodes[i+1]);
         edge(nodes[41], nodes[0]);
+    }
+
+    private void gallery2() {
+        int i = 0;
+        Vertex[] v = new Vertex[15];
+        v[i++] = new Vertex(0,6);
+        v[i++] = new Vertex(0,0);
+        v[i++] = new Vertex(3,0);
+        v[i++] = new Vertex(4,1);
+        v[i++] = new Vertex(6,1);
+        v[i++] = new Vertex(8,0);
+        v[i++] = new Vertex(12,0);
+        v[i++] = new Vertex(13,2);
+        v[i++] = new Vertex(8,2);
+        v[i++] = new Vertex(8,4);
+        v[i++] = new Vertex(11,4);
+        v[i++] = new Vertex(11,6);
+        v[i++] = new Vertex(6,6);
+        v[i++] = new Vertex(4,3);
+        v[i++] = new Vertex(2,6);
+        Node nodes[] = new Node[15];
+        int x, y, f = 20;
+        for (i=0; i < 15; i++) {
+            x = ((v[i].getX() + 1) * f);
+            y = ((v[i].getY() + 1) * f);
+            nodes[i] = newNode(x, y);
+        }
+        for (i=0; i < 14; i++) {
+            edge(nodes[i], nodes[i+1]);
+        }
+        edge(nodes[14], nodes[0]);
     }
 
     // ----------------------------------------------------------------------

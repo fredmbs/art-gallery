@@ -50,7 +50,7 @@ public class Configuration extends JDialog {
     private final JPanel contentPanel = new JPanel();
     public int testCase = 0;
     public boolean ok = false;
-    public String[] testCases = {"Gallery 1", "Simple Gallery"};
+    public String[] testCases = {"Gallery 1", "Simple Gallery", "Gallery 2"};
 
     /**
      * Launch the application.

@@ -28,10 +28,9 @@
 
 package local;
 
-public class Vertex {
+
+public class Vertex implements Comparable<Vertex>{
     protected int x, y;
-    protected Vertex next = null;
-    protected Vertex diagonal = null;
     protected int color = 0;
 
     public Vertex(int x, int y) {
@@ -47,14 +46,6 @@ public class Vertex {
 
     public int getColor() { return color; };
 
-    public Vertex getNext() { return next; };
-    public void setNext(Vertex v) { next = v; };
-
-    public Vertex getDiagonal() { return diagonal; };
-    // here, we can check the triangle orientation... 
-    // but, this is the responsibility of the class that make the triangulation
-    public void setDiagonal(Vertex v) { diagonal = v; };
-
     private void setLocation(int x, int y) { 
         this.x = x;
         this.y = y;
@@ -63,7 +54,39 @@ public class Vertex {
 
     @Override
     public String toString() {
-        return "Vertex [(" + x + ", " + y + "), color=" + color + "]";
+        return "(" + x + ", " + y + ")c" + color;
+    }
+
+    @Override
+    public int compareTo(Vertex other) {
+        if (this.x == other.x)
+            return (this.y - other.y); 
+        return (this.x - other.x);
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + x;
+        result = prime * result + y;
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Vertex other = (Vertex) obj;
+        if (x != other.x)
+            return false;
+        if (y != other.y)
+            return false;
+        return true;
     }
     
 }

@@ -30,15 +30,23 @@ package local;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 
 public class Polygon implements Iterable<Vertex> {
+    
+    // In case of float point operation:  
+    final static double EPSILON = 0.000000001;
     
     private boolean closed, triangulated;
     // Counter-Clock Wise order!
     private ArrayList<Vertex> pointsInOrder;
-    private ArrayList<Edge> diagonals;
-    private ArrayList<Edge> sides;
+    private HashMap<Edge, Diagonal> diagonals;
+    
+    // we can keep all triangles, if need in preview
+    // but, we need to known at least on triangle to start colorization
+    private Triangle hook;
     
     private int minColor = 0;
 
@@ -47,8 +55,7 @@ public class Polygon implements Iterable<Vertex> {
         triangulated = false;
         pointsInOrder = new ArrayList<Vertex>();
         pointsInOrder.add(first);
-        diagonals = new ArrayList<Edge>();
-        sides = new ArrayList<Edge>();
+        diagonals = new HashMap<Edge, Diagonal>();
     }
     
     public int size() {
@@ -62,8 +69,6 @@ public class Polygon implements Iterable<Vertex> {
     public boolean close() {
             if (pointsInOrder.size() < 3)
                 return false;
-            Vertex last = pointsInOrder.get(pointsInOrder.size() - 1);
-            last.setNext(pointsInOrder.get(0));
             closed = true;
             return true;
     }
@@ -72,10 +77,6 @@ public class Polygon implements Iterable<Vertex> {
         if (closed) return false;
         if (next.equals(pointsInOrder.get(0))) {
             return close();
-        }
-        int last = pointsInOrder.size() - 1;
-        if (last >= 0) {
-            pointsInOrder.get(last).setNext(next);
         }
         pointsInOrder.add(next);
         return true;
@@ -100,17 +101,13 @@ public class Polygon implements Iterable<Vertex> {
         return area * 0.5d;
     }    
     
-    private boolean testIntersection(Vertex v00, Vertex v01, Vertex v10, Vertex v11) {
-    	Edge e0 = new Edge(v00, v01);
-    	Edge e1 = new Edge(v10, v11);
-    	return e0.intersect(e1);    	
-    }
-    
-    private Edge makeDiagonal(Vertex v, int i) {
-    	Edge diag = new Edge(v, pointsInOrder.get(i));
-    	for (Edge side: sides)
-    		if (diag.intersect(side)) 
-    			return null;
+    /*
+    private Edge makeDiagonal(Vertex from, Vertex to) {
+    	Edge diag = new Edge(from, to);
+        for (Edge side: sides) {
+            if (!side.contains(diag) && diag.intersect(side))
+                return null;
+        }
         //if (Triangle.inCCW(diag, pointsInOrder.get(i+1)))
         	return diag;
         //return null;
@@ -123,15 +120,51 @@ public class Polygon implements Iterable<Vertex> {
         for(int p = n - 1, q = 0; q < n; p = q++) {
             sides.add(new Edge(pointsInOrder.get(p), pointsInOrder.get(q)));
         }
-        n--;
-        diagonals.clear();
         Edge diag;
         Vertex v = pointsInOrder.get(0);
-        for (int i = 2; i < n; i++) {
-        	if ((diag = makeDiagonal(v, i)) != null)  
+        diagonals.clear();
+        for (int i = 2; i < (n - 1); i++) {
+        	if ((diag = makeDiagonal(v, pointsInOrder.get(i))) != null)  
         		diagonals.add(diag);
         }
     }    
+    */
+    
+    private void newDiagonal(Triangle tt) {
+        // must to make a copy of informed triangle (see triangulate method)
+        Triangle t = new Triangle(tt);
+        if (hook == null) hook = t;
+        Diagonal d;
+        // presupposition: the diagonal always is v2-v0
+        // otherwise, the edge must be informed as parameter
+        Edge e = new Edge(t.v2, t.v0);
+        if ((d = diagonals.get(e)) == null) {
+            d = new Diagonal(t);
+            diagonals.put(e, d);
+            checkSide(t, new Edge(t.v0, t.v1));
+            checkSide(t, new Edge(t.v1, t.v2));
+        }
+        /*
+        else {
+            // we can check if the triangulation is correct here
+        }
+        */
+    }
+    
+    private void checkSide(Triangle t, Edge e) {
+        Diagonal d;
+        if ((d = diagonals.get(e)) != null) { 
+            // we can check if the triangulation is correct here
+            d.setRelated(t);
+        }
+    }
+    
+    private void newTriangle(Vertex v0, Vertex v1, Vertex v2) {
+        Triangle t = new Triangle(v0, v1, v2);
+        if (hook == null) hook = t;
+        for (Edge e: t.getEdges())
+            checkSide(t, e);
+    }
     
     // Ref: www.flipcode.com/archives/Efficient_Polygon_Triangulation.shtml
     public boolean triangulate(int init) {
@@ -150,8 +183,10 @@ public class Polygon implements Iterable<Vertex> {
         //-------------------------------------------------------------------
         // Preparation (initialization)
         //-------------------------------------------------------------------
-        clearColors();
+        // clear last triangulation
+        triangulated = false;
         diagonals.clear();
+        hook = null;
         // new polygon that will be reduced until remain only a triangle.
         @SuppressWarnings("unchecked")
         ArrayList<Vertex> remaining = (ArrayList<Vertex>)pointsInOrder.clone();
@@ -167,6 +202,7 @@ public class Polygon implements Iterable<Vertex> {
         int loop = 0;
         Triangle t = new Triangle();
         iv0 = init;
+        //ArrayList<Triangle> test = new ArrayList<Triangle>();
         //-------------------------------------------------------------------
         // Main loop (cut ears...)
         //-------------------------------------------------------------------
@@ -174,7 +210,6 @@ public class Polygon implements Iterable<Vertex> {
             // was made a full cycle without to find a triangle?
             if (loop++ >= size) return false;
             // take three consecutive vertexes (v0, v1, v2)
-            if (iv0 >= size) iv0 = 0;
             iv1 = (iv0 + 1) % size;
             iv2 = (iv1 + 1) % size;
             // set the triangle of these vertexes...
@@ -185,9 +220,7 @@ public class Polygon implements Iterable<Vertex> {
             // verify if the triangle makes a valid diagonal
             if (t.inCCW() && !t.hasVertexInside(remaining)) {
                 loop = 0;  // new cycle
-                v2.setDiagonal(v0);
-                diagonals.add(new Edge(v0, v2));
-                t.coloring();
+                newDiagonal(t); 
                 remaining.remove(v1);
                 size--;
                 if (iv0 >= size) iv0 = (size - 1);
@@ -201,11 +234,11 @@ public class Polygon implements Iterable<Vertex> {
         v0 = remaining.get(0);
         v1 = remaining.get(1);
         v2 = remaining.get(2);
-        t.set(v0, v1, v2);
-        t.coloring();
-        countColors();
-        triangulated = true;
-        test();
+        newTriangle(v0, v1, v2);
+        coloring();
+        if (countColors())
+            triangulated = true;
+        //test();
         return triangulated;
     }
     
@@ -217,7 +250,35 @@ public class Polygon implements Iterable<Vertex> {
             v.color = 0;
     }
     
-    private void countColors() {
+    private void coloring() {
+        // reset current control
+        minColor = 0;
+        // clear vertexes colors:
+        for (Vertex v: pointsInOrder) 
+            v.color = 0;
+        // coloring the first triangle
+        hook.v0.color = 1;
+        hook.v1.color = 2;
+        hook.v2.color = 3;
+        // coloring others triangles
+        for (Edge e: hook.getEdges()) 
+            recursive_coloring(hook, e);
+    }
+    
+    private void recursive_coloring(Triangle from, Edge e) {
+        Diagonal d = diagonals.get(e);
+        if (d == null) return;
+        Triangle to = d.getOpposite(from); 
+        if (to == null) return;
+        if (to.isColored()) return;
+        to.coloringFirstColorlessVertex();
+        for (Edge next: to.getEdges()) {
+            if (!next.equals(e))
+                recursive_coloring(to, next);
+        }
+    }
+    
+    private boolean countColors() {
         // summing the colors:
         int colorCount[] = new int[4];
         colorCount[0] = 0;
@@ -228,7 +289,7 @@ public class Polygon implements Iterable<Vertex> {
             colorCount[v.color]++;
         // Coloring problem?
         if (colorCount[0] > 0)
-            return;
+            return false;
         // find min(colorCount):
         int minCount = Integer.MAX_VALUE;
         for (int i = 1; i < 4; i++)
@@ -238,6 +299,7 @@ public class Polygon implements Iterable<Vertex> {
             } else if ((minCount == colorCount[i]) && (minColor > i)) {
                 minColor = i;
             }
+        return true;
     }
     
     public int getMinColor() {
@@ -250,8 +312,8 @@ public class Polygon implements Iterable<Vertex> {
         return pointsInOrder.get(i).color;
     }
     
-    public ArrayList<Edge> getDiagonals() {
-        return diagonals;
+    public Set<Edge> getDiagonals() {
+        return diagonals.keySet();
     }
 
     @Override
@@ -322,7 +384,7 @@ public class Polygon implements Iterable<Vertex> {
     }
     
     public static void main(String[] args) {
-        Vertex v[] = ex3();
+        Vertex v[] = ex2();
         int n = v.length;
         int i;
         

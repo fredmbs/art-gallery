@@ -32,26 +32,49 @@ import java.util.Collection;
 
 public class Triangle {
     
-    final static double EPSILON = 0.000000001;
-    static int n = 0;
     Vertex v0, v1, v2;
+    Edge edges[];
+
+    public Triangle() {
+        set(null, null, null);
+    }
+
+    public Triangle(Triangle t) {
+        set(t.v0, t.v1, t.v2);
+    }
+    
+    public Triangle(Vertex v0, Vertex v1, Vertex v2) {
+        set(v0, v1, v2);
+    }
 
     public void set(Vertex v0, Vertex v1, Vertex v2) {
         this.v0 = v0;
         this.v1 = v1;
         this.v2 = v2;
+        this.edges = null;
+    }
+    
+    public Edge[] getEdges() {
+        if (edges == null) {
+            edges = new Edge[3];
+            edges[0] = new Edge(v0, v1);
+            edges[1] = new Edge(v1, v2);
+            edges[2] = new Edge(v2, v0);
+        }
+        return edges;
     }
 
-    static private double side(Vertex v0, Vertex v1, Vertex v2) {
+    // cross product of 3D with z = 0
+    static private double cp(Vertex v0, Vertex v1, Vertex v2) {
         return (((v1.x-v0.x)*(v2.y-v0.y))-((v1.y-v0.y)*(v2.x-v0.x)));
     }
 
     public boolean inCCW() {
-        return side(v0, v1, v2) < EPSILON;
+        return cp(v0, v1, v2) < Polygon.EPSILON;
     }
     
     static public boolean inCCW(Edge e, Vertex v) {
-        return side(e.v0, e.v1, v) < EPSILON;
+        return cp(e.v0, e.v1, v) < Polygon.EPSILON;
     }
     
     public boolean hasVertexInside(Collection<Vertex> vertexes) {
@@ -62,14 +85,14 @@ public class Triangle {
     }
     
     public boolean inCollision(Vertex p) {
-        boolean d0 = side(p, v0, v1) < 0.0;
-        boolean d1 = side(p, v1, v2) < 0.0;
-        boolean d2 = side(p, v2, v0) < 0.0;
+        boolean d0 = cp(p, v0, v1) < Polygon.EPSILON;
+        boolean d1 = cp(p, v1, v2) < Polygon.EPSILON;
+        boolean d2 = cp(p, v2, v0) < Polygon.EPSILON;
         return ((d0 == d1) && (d1 == d2));
     }
     
     public boolean hasVertex(Vertex p) {
-        return (p == v0) || (p == v1) || (p == v2);
+        return (p.equals(v0) || p.equals(v1) || p.equals(v2));
     }
 
     public int nextColor(boolean colors[]) {
@@ -87,7 +110,28 @@ public class Triangle {
         return color;
     }
     
+    static final int free_color_by_sum[] = { 0, 0, 0, 3, 2, 1, 0 }; 
+    public int getFreeColor() {
+        // here, the colorization also can be checked, but it is not.
+        return free_color_by_sum[v0.color + v1.color + v2.color];
+    }
+    
+    public void coloringFirstColorlessVertex() {
+        if (v0.color == 0) {
+            v0.color = getFreeColor();
+        } else if (v1.color == 0) {
+            v1.color = getFreeColor();
+        } else if (v2.color == 0) {
+            v2.color = getFreeColor();
+        }
+    }
+
+    public boolean isColored() {
+        return (v0.color + v1.color + v2.color) == 6;
+    }
+
     public void coloring() {
+        // precondition: all booleans in array must be initialized with false
         boolean colors[] = new boolean[4];
         colors[v0.color] = true;
         colors[v1.color] = true;
@@ -99,8 +143,7 @@ public class Triangle {
 
     @Override
     public String toString() {
-        return "Triangle => (" + v0.x + "," + v0.y + ") (" +
-                v1.x + "," + v1.y + ") (" + v2.x + "," + v2.y + ")";
+        return "Triangle => [" + v0 + "-" + v1 + "-" + v2 + "]";
     
     }
     

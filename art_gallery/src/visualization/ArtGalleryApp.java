@@ -118,11 +118,11 @@ implements Runnable, ActionListener, ListSelectionListener,
 
     static int test = 0;
     private void refresh(JComponent c) {
-        //c.revalidate();
+        c.revalidate();
         c.repaint();
         JComponent pane = c.getRootPane();
         if (pane != null) {
-            //pane.revalidate();
+            pane.revalidate();
             pane.repaint();
         }
     }
