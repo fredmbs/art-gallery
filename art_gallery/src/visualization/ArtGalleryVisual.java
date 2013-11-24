@@ -35,10 +35,12 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.util.concurrent.locks.ReentrantLock;
 
+import local.BasicTriangulation;
 import local.Edge;
 import local.Vertex;
 
 import distributed.ArtGallery;
+import distributed.ArtGalleryAlgorithm;
 import distributed.Process;
 
 
@@ -49,15 +51,17 @@ public class ArtGalleryVisual extends ArtGallery {
         Color.RED, Color.GREEN, Color.BLUE };
     final static Color diagonalColor = Color.YELLOW; //new Color(1.0f, 1.0f, 0.0f, 0.5f);
     final static Color galleryColor = Color.BLACK;
+    final static int radius = 4;
     
     private java.awt.Polygon visualPolygon;
 
-    public ArtGalleryVisual(Process p) {
-        super(p);
+    public ArtGalleryVisual(ArtGalleryAlgorithm a, Process p) {
+        super(a, p);
         this.visualPolygon = new java.awt.Polygon();
         visualPolygon.addPoint(p.getX(), p.getY());
         // must to be the last call, because visualPolygon construct.
-        ArtGalleryApp.getApp().addVisual(this);
+        ArtGalleryApp app = ArtGalleryApp.getApp();
+        if (app != null) app.addVisual(this);
     }
 
     // Avoid race condition caused by 
@@ -105,8 +109,10 @@ public class ArtGalleryVisual extends ArtGallery {
         lock.lock();  // block until condition holds
         try {
             if (super.guard()) {
-                if (viewer != null) 
+                if (viewer != null) {
+                    viewer.setMessage(getSummary());
                     viewer.refresh();
+                }
                 return true;
             }
             return false;
@@ -127,8 +133,8 @@ public class ArtGalleryVisual extends ArtGallery {
         drawInitialVertex(g);
         for (Vertex v: getPolygon())
             drawVertex(g, v);
-        if (showDiagonals)
-            for (Edge e: getPolygon().getDiagonals())
+        if (showDiagonals && (getAlgorithm() instanceof BasicTriangulation))
+            for (Edge e: ((BasicTriangulation) getAlgorithm()).getDiagonals())
                 drawEdge(g, e);
         g.setColor(oc);
     }
@@ -136,20 +142,19 @@ public class ArtGalleryVisual extends ArtGallery {
     public void drawVertex (Graphics g, Vertex v) {
         int x = v.getX();
         int y = v.getY();
-        int r = 4;
         int c = v.getColor();
         g.setColor(processColor[c]);
-        if (c == getGuardColor())
-            g.fillOval(x-r, y-r, r+r, r+r);
+        if (c == getGuardStatus())
+            g.fillOval(x-radius, y-radius, 2*radius, 2*radius);
         else
-            g.drawOval(x-r, y-r, r+r, r+r);
+            g.drawOval(x-radius, y-radius, 2*radius, 2*radius);
     }
     
     public void drawInitialVertex(Graphics g) {
         Vertex v = getPolygon().get(0);
         int x = v.getX();
         int y = v.getY();
-        int r = 7;
+        int r = radius + 3;
         int c = v.getColor();
         g.setColor(processColor[c]);
         Graphics2D g2 = (Graphics2D)g;

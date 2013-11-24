@@ -47,6 +47,13 @@ public class Triangle {
         set(v0, v1, v2);
     }
 
+    public void set(Triangle t) {
+        this.v0 = t.v0;
+        this.v1 = t.v1;
+        this.v2 = t.v2;
+        this.edges = null;
+    }
+    
     public void set(Vertex v0, Vertex v1, Vertex v2) {
         this.v0 = v0;
         this.v1 = v1;
@@ -64,17 +71,35 @@ public class Triangle {
         return edges;
     }
 
-    // cross product of 3D with z = 0
+    /* cross product of 3D with z = 0
+     "Note that the signed area will be positive if the vertices V0V1V2 
+     are oriented counterclockwise around the triangle, 
+     and will be negative if the triangle is oriented clockwise; and so, 
+     this area computation can be used to test for a triangle's orientation. 
+     This signed area can also be used to test whether the point V2 
+     is to the left (positive) or the right (negative) of the directed 
+     line segment V0V1 . So this value is a very useful primitive, 
+     and it's great to have such an efficient formula for it."
+     http://geomalgorithms.com/a01-_area.html
+     */
     static private double cp(Vertex v0, Vertex v1, Vertex v2) {
-        return (((v1.x-v0.x)*(v2.y-v0.y))-((v1.y-v0.y)*(v2.x-v0.x)));
+        return (((v1.x-v0.x)*(v2.y-v0.y))-((v2.x-v0.x)*(v1.y-v0.y)));
     }
 
-    public boolean inCCW() {
-        return cp(v0, v1, v2) < Polygon.EPSILON;
+    public double area() {
+        return Math.abs(cp(v0, v1, v2) / 2.0d);
+    }    
+    
+    public double signed_area() {
+        return cp(v0, v1, v2) / 2.0d;
+    }    
+    
+    public boolean inClockwise() {
+        return cp(v0, v1, v2) < 0;
     }
     
-    static public boolean inCCW(Edge e, Vertex v) {
-        return cp(e.v0, e.v1, v) < Polygon.EPSILON;
+    static public boolean inClockwise(Edge e, Vertex v) {
+        return cp(e.v0, e.v1, v) < 0;
     }
     
     public boolean hasVertexInside(Collection<Vertex> vertexes) {
@@ -147,4 +172,21 @@ public class Triangle {
     
     }
     
+    public static void main(String[] args) {
+        Vertex v0 = new Vertex(1, 1);
+        Vertex v1 = new Vertex(3, 1);
+        Vertex v2 = new Vertex(1, 3);
+        System.out.println("t1 cross product = " + cp(v0, v1, v2));
+        System.out.println("t2 cross product = " + cp(v1, v0, v2));
+        Triangle t1 = new Triangle(v0, v1, v2);
+        Triangle t2 = new Triangle(v1, v0, v2);
+        System.out.println("t1 = " + t1);
+        System.out.println("t2 = " + t2);
+        if (!t1.inClockwise()) System.out.println("t1 counter-clockwise direction ok");
+        else System.out.println("t1 counter-clockwise direction fail");
+        if (t2.inClockwise()) System.out.println("t2 clockwise direction ok");
+        else System.out.println("t2 clockwise direction fail");
+        System.out.println("t1 area = " + t1.area());
+        System.out.println("t2 area = " + t2.area());
+    }
 }

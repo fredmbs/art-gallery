@@ -39,6 +39,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -51,6 +52,7 @@ public class Configuration extends JDialog {
     public int testCase = 0;
     public boolean ok = false;
     public String[] testCases = {"Gallery 1", "Simple Gallery", "Gallery 2"};
+    public String fileName = null;
 
     /**
      * Launch the application.
@@ -136,6 +138,23 @@ public class Configuration extends JDialog {
                         setVisible(false);
                     }
                 });
+                {
+                    JButton btnFile = new JButton("File");
+                    btnFile.addActionListener(new ActionListener() {
+                        public void actionPerformed(ActionEvent arg0) {
+                            final JFileChooser fc = new JFileChooser("."); 
+                            fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                            int returnVal = fc.showOpenDialog(fc);
+                            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                                fileName = fc.getSelectedFile().getPath();
+                                ok = true;
+                                testCase = 99;
+                                setVisible(false);
+                            }
+                        }
+                    });
+                    buttonPane.add(btnFile);
+                }
                 okButton.setActionCommand("OK");
                 buttonPane.add(okButton);
                 getRootPane().setDefaultButton(okButton);

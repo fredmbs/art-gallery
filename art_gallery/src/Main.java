@@ -26,10 +26,14 @@
  * THE SOFTWARE. 
 */
 // ----------------------------------------------------------------------
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 
 import local.Vertex;
-
 import visualization.ArtGalleryApp;
 import visualization.ArtGalleryVisualFactory;
 import daj.Application;
@@ -60,6 +64,7 @@ public class Main extends Application {
         app.channelRadius = 4;
         app.channelWidth = 2;
         app.nodeNormalFont = app.nodeSmallFont;
+        ArtGalleryApp.start(false);
         app.run();
     }
     
@@ -95,24 +100,34 @@ public class Main extends Application {
     // ----------------------------------------------------------------------
     public void construct() {
 
-        cfg.setVisible(true);
-        if (!cfg.ok) System.exit(0);
+        ArtGalleryApp.clear();
         
-        ArtGalleryApp.start(false);
-        
-        switch(cfg.testCase) {
-        case 0:
-            gallery1();
-            break;
-        case 1:
-            simpleGallery();
-            break;
-        case 2:
-            gallery2();
-            break;
-        default:
-            System.exit(1);
+        this.requestFocus();
+        cfg.ok = false;
+        while (!cfg.ok) {
+            cfg.setVisible(true);
+            if (!cfg.ok) System.exit(0);
+            
+            switch(cfg.testCase) {
+            case 0:
+                gallery1();
+                break;
+            case 1:
+                simpleGallery();
+                break;
+            case 2:
+                gallery2();
+                break;
+            case 99:
+                if (!read(cfg.fileName)) {
+                    cfg.ok = false;
+                }
+                break;
+            default:
+                System.exit(1);
+            }
         }
+        this.repaint();
     }
     
     private void simpleGallery() {
@@ -210,6 +225,39 @@ public class Main extends Application {
         }
         edge(nodes[14], nodes[0]);
     }
+    
+    public boolean read(String from) {
+        Scanner scanner;
+        try {
+            scanner = new Scanner(new File(from));
+            try {
+                int x, y, size = scanner.nextInt();
+                Node nodes[] = new Node[size];
+                for (int i = 0; i < size; i++) {
+                    x = scanner.nextInt();
+                    y = scanner.nextInt();
+                    nodes[i] = newNode(x, y);
+                }
+                for (int i=0; i < (size - 1); i++) 
+                    edge(nodes[i], nodes[i+1]);
+                edge(nodes[size-1], nodes[0]);
+                return true;
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, 
+                        "Reading error.\n" + from + "\n Check file format.",
+                        "Art Gallery File", JOptionPane.ERROR_MESSAGE);
+                return false;
+            } finally {
+                scanner.close();
+            }
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(this, 
+                    "File not found!\n" + from,
+                    "Art Gallery File", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
+    
 
     // ----------------------------------------------------------------------
     // informative message
@@ -217,7 +265,9 @@ public class Main extends Application {
     public String getText() {
         return  "Distributed Art Gallery \n" + 
                 "\n------------------------------------------------------\n" +
-                "\n Test case: " + cfg.testCases[cfg.testCase];
+                "\n Test case: " + 
+                (cfg.testCase < cfg.testCases.length ?
+                        cfg.testCases[cfg.testCase] : cfg.fileName);
     }
     
     @Override

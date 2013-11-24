@@ -104,7 +104,7 @@ public class Prog extends Program {
                         // terminate the algorithm!
                         gallery.guard();
                         // mark the color in DAJ
-                        String label = gallery.getColor(process).toString();
+                        String label = gallery.getStatus(process).toString();
                         if (gallery.isGuard(process)) 
                             this.setLabel("!" + label);
                         else

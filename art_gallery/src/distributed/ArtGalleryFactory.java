@@ -28,8 +28,17 @@
 
 package distributed;
 
+import local.BasicTriangulation;
+//import local.FieldOfView;
+
 public class ArtGalleryFactory {
+    
+    public ArtGalleryAlgorithm construct() {
+        //return new FieldOfView();
+        return new BasicTriangulation();
+    }
+    
     public ArtGallery construct(Process p) {
-            return new ArtGallery(p);
+            return new ArtGallery(construct(), p);
     }
 }

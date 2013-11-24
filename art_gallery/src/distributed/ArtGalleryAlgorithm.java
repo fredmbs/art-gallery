@@ -26,57 +26,18 @@
  * THE SOFTWARE. 
 */
 
-package local;
+package distributed;
 
-import java.util.ArrayList;
+import local.Polygon;
 
-public class Polygon extends ArrayList<Vertex> {
+public interface ArtGalleryAlgorithm {
     
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -49433842819633387L;
-
-    // In case of float point operation:  
-    final static double EPSILON = 0.000000001;
-    
-    private boolean closed;
-    // Any order! The triangulation must to adjust the orientation.
-    
-    public Polygon() {
-        closed = false;
-    }
-    
-    public boolean close() {
-            if (size() < 3)
-                return false;
-            closed = true;
-            return true;
-    }
-    
-    @Override
-    public boolean add(Vertex v) {
-        if (closed) return false;
-        if (size() > 0 && v.equals(get(0))) {
-            return close();
-        }
-        super.add(v);
-        return true;
-    }
-
-    public boolean isClosed() {
-        return closed;
-    }
-    
-    public double area()
-    {
-        int n = size();
-        double area = 0.0d;
-        for(int p = n - 1, q = 0; q < n; p = q++) {
-            area += get(p).getX() * get(q).getY() - 
-                    get(q).getX() * get(p).getY();
-        }
-        return area / 2.0d;
-    }    
+    public boolean isSolved();
+    public boolean solve(int init);
+    public int getGuardStatus();
+    public boolean isGuard(int i);
+    public int getStatus(int i);
+    public String getSummary();
+    public void setPolygon(Polygon p);
     
 }

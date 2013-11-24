@@ -35,6 +35,6 @@ import distributed.Process;
 public class ArtGalleryVisualFactory extends ArtGalleryFactory {
     @Override
     public ArtGallery construct(Process p) {
-                return new ArtGalleryVisual(p);
+                return new ArtGalleryVisual(construct(), p);
     }
 }

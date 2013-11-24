@@ -30,11 +30,18 @@ package visualization;
 
 import java.awt.Color;
 import java.awt.Graphics;
+
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class ArtGalleryViewer extends JPanel {
 
+    final static Color processColor[] = { Color.BLACK, 
+        Color.RED, Color.GREEN, Color.BLUE };
+    final static Color diagonalColor = Color.YELLOW; //new Color(1.0f, 1.0f, 0.0f, 0.5f);
+    final static Color galleryColor = Color.BLACK;
+    final static int radius = 4;
+    
     private ArtGalleryVisual visual;
     private ArtGalleryApp app;
     private boolean changed = false;
@@ -59,9 +66,14 @@ public class ArtGalleryViewer extends JPanel {
         ArtGalleryVisual oldVisual = this.visual;
         if (oldVisual != null) 
             oldVisual.setViewer(null);
-        gallery.setViewer(this);
+        if (gallery != null)
+            gallery.setViewer(this);
         this.visual = gallery;
         refresh();
+    }
+    
+    public void setMessage(String msg) {
+        app.setMessage(msg);
     }
     
     public void clear(Graphics g) {
@@ -81,5 +93,5 @@ public class ArtGalleryViewer extends JPanel {
         if (visual == null || !changed) return;
         visual.draw(g, app.triangulation.isSelected());
     }
-
+    
 }

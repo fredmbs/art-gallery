@@ -36,20 +36,38 @@ import local.Vertex;
 
 public class ArtGallery {
 
-    private Polygon polygon = null;
     private Process process;
     private HashMap<Process, Integer> processes;
     private int count = 0;
+    private Polygon polygon;
+    private ArtGalleryAlgorithm algorithm;
     
-    public ArtGallery(Process p) {
+    public ArtGallery(ArtGalleryAlgorithm a, Process p) {
+        algorithm = a;
         process = p;
-        polygon = new Polygon(new Vertex(p.getX(), p.getY()));
+        polygon = new Polygon();
+        polygon.add(new Vertex(p.getX(), p.getY()));
+        algorithm.setPolygon(polygon);
         processes = new HashMap<Process, Integer>();
         processes.put(p, count++);
     }
     
-    public Process getProcess() { return process; };
+    public Process getProcess() { 
+        return process; 
+    };
     
+    public Polygon getPolygon() {
+        return polygon;
+    }
+    
+    public ArtGalleryAlgorithm getAlgorithm() {
+        return algorithm;
+    }
+    
+    public boolean isComplete() {
+        return polygon.isClosed();
+    }
+
     public boolean addRemoteProcessInOrder(Process p) {
         if (processes.containsKey(p)) {
             if (process == p)
@@ -57,53 +75,45 @@ public class ArtGallery {
             return false;
         }
         processes.put(p, count++);
-        return polygon.addVertexInOrder(new Vertex(p.getX(), p.getY()));
+        return polygon.add(new Vertex(p.getX(), p.getY()));
     }
     
-    public boolean isComplete() {
-        return polygon.isClosed();
-    }
-
     public boolean guard() {
         Process minProcess = Collections.min(processes.keySet());
         int min = processes.get(minProcess);
-        return polygon.triangulate(min);
+        return algorithm.solve(min);
     }
 
     public boolean isGuard(Process p) {
-        return polygon.getColor(0) == polygon.getMinColor();
+        return algorithm.isGuard(0);
     }
     
-    protected int getGuardColor() {
-        return polygon.getMinColor();
+    protected int getGuardStatus() {
+        return algorithm.getGuardStatus();
     }
     
     public boolean hasProcess(Process p) {
         return processes.containsKey(p);
     }
     
-    public Polygon getPolygon() {
-        return polygon;
-    }
-    
     public int getNumProcesses() {
         return count;
     }
     
-    public Integer getColor(Process p) {
+    public Integer getStatus(Process p) {
         Integer i = processes.get(p);
         if (i == null)
             return 0;
-        return polygon.getColor(i);
+        return algorithm.getStatus(i);
     }
-
-    public Integer getColor(int i) {
-        return polygon.getColor(i);
+    
+    public String getSummary() {
+        return algorithm.getSummary();
     }
 
     @Override
     public String toString() {
-        return process + "[" + polygon.getColor(0) + "]";
+        return process + "[" + algorithm.getStatus(0) + "]";
     }
 
 }

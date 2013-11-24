@@ -30,7 +30,6 @@ package visualization;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -49,7 +48,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -58,8 +56,6 @@ public class ArtGalleryApp extends java.applet.Applet
 implements Runnable, ActionListener, ListSelectionListener, 
            MouseListener, MouseMotionListener, ItemListener
 {
-    protected JLabel mousePos = new JLabel("(x,y)");
-    
     static private ArtGalleryApp app = null;
     
     static public void start(boolean mainApp) {
@@ -75,14 +71,18 @@ implements Runnable, ActionListener, ListSelectionListener,
         return app;
     }
     
-    private ArtGalleryViewer viewer;
-    private JFrame dWindow;
+    static public void clear() {
+        app.restart();
+    }
     
-    private String windowTitle = "The Art Gallery Problem"; 
+    private ArtGalleryViewer viewer;
+    private String windowTitle = "Distributed Art Gallery Visualizer"; 
+
+    private JFrame dWindow;
     private DefaultListModel<ArtGalleryVisual> listModel;
     private JList<ArtGalleryVisual> list;
     private JScrollPane scrollPane = new JScrollPane(list);
-    
+
     public void disposable() {
         dWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
@@ -91,7 +91,7 @@ implements Runnable, ActionListener, ListSelectionListener,
      * Main program (used when run as application instead of applet).
      */
     public void configure(boolean mainWindow) {
-        //this.init();                    // Applet initialization
+        this.init();                    // Applet initialization
         dWindow = new JFrame();         // Create window
         dWindow.setSize(750, 620);      // Set window size
         dWindow.setTitle(windowTitle);  // Set window title
@@ -111,12 +111,17 @@ implements Runnable, ActionListener, ListSelectionListener,
      * As recommended, the actual use of Swing components takes place in the
      * event-dispatching thread.
      */
-    public void init () {
-        try {SwingUtilities.invokeAndWait(this);}
-        catch (Exception e) {System.err.println("Initialization failure");}
-    }
+    //public void init () {
+    //    try {SwingUtilities.invokeAndWait(this);}
+    //    catch (Exception e) {System.err.println("Initialization failure");}
+    //}
 
-    static int test = 0;
+    private void restart() {
+        listModel.clear();
+        viewer.setVisual(null);
+        refresh(scrollPane);
+    }
+    
     private void refresh(JComponent c) {
         c.revalidate();
         c.repaint();
@@ -150,20 +155,22 @@ implements Runnable, ActionListener, ListSelectionListener,
     }
     
     public void refresh() {
-        refresh(scrollPane);
+        scrollPane.repaint();
     }
-    
-    protected JCheckBox triangulation = new JCheckBox("Triangulation");
 
-    private void initViewerControls() {
-        JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout());
-        panel.add(triangulation);
-        triangulation.doClick();
-        triangulation.addItemListener(this);
-        panel.add(mousePos);
-        add("South",panel);
+    public void selectAt(int x, int y) {
+        int px, py;
+        int r = 6;
+        for (int i = 0; i < listModel.size(); i++) {
+            ArtGalleryVisual agv = listModel.get(i); 
+            px = agv.getProcess().getX();
+            py = agv.getProcess().getY();
+            if (x >= px-r && x <= px+r && y >= py-r && y <= py+r) {
+                list.setSelectedValue(agv, true);
+            }
+        }
     }
+
     
     /**
      * Set up the applet's GUI.
@@ -175,6 +182,7 @@ implements Runnable, ActionListener, ListSelectionListener,
         setLayout(new BorderLayout());
         viewer = new ArtGalleryViewer(this);
         viewer.addMouseMotionListener(this);
+        viewer.addMouseListener(this);
         viewer.setBackground(Color.WHITE);
         add("Center",viewer);
         initViewerControls();
@@ -197,6 +205,25 @@ implements Runnable, ActionListener, ListSelectionListener,
         }
     }
    
+    protected JPanel controlPanel = new JPanel();
+    protected JCheckBox triangulation = new JCheckBox("Triangulation");
+    protected JLabel mousePos = new JLabel("(x,y)");
+    protected JLabel text = new JLabel("");
+    
+    public void setMessage(String msg) {
+        text.setText(msg);
+    }
+    
+    private void initViewerControls() {
+        controlPanel.setLayout(new BorderLayout());
+        triangulation.doClick();
+        triangulation.addItemListener(this);
+        controlPanel.add("West", triangulation);
+        controlPanel.add("Center", text);
+        controlPanel.add("East", mousePos);
+        add("South",controlPanel);
+    }
+    
     /**
      * Some not used, but needed for MouseListener.
      */
@@ -205,11 +232,16 @@ implements Runnable, ActionListener, ListSelectionListener,
     @Override
     public void mouseExited(MouseEvent e) {}
     @Override
-    public void mousePressed(MouseEvent e) {}
+    public void mousePressed(MouseEvent e) {
+        if (e.getSource() == viewer) {
+            selectAt(e.getX(), e.getY());
+        }
+    }
     @Override
     public void mouseReleased(MouseEvent e) {}
     @Override
-    public void mouseClicked(MouseEvent e) {}
+    public void mouseClicked(MouseEvent e) {
+    }
     @Override
     public void mouseDragged(MouseEvent arg0) {}
     @Override
@@ -223,7 +255,6 @@ implements Runnable, ActionListener, ListSelectionListener,
     /**
      * ItemListener
      */
-    static int teste = 0;
     @Override
     public void itemStateChanged(ItemEvent e) {
         if (e.getItem() == triangulation) {
