@@ -1,5 +1,6 @@
 *.class
 *.applet
+*.snapshot
 
 # Package Files #
 *.jar
