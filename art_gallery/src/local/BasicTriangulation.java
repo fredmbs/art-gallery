@@ -29,7 +29,6 @@
 package local;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -116,11 +115,13 @@ public class BasicTriangulation implements ArtGalleryAlgorithm {
         diagonals.clear();
         hook = null;
         // new polygon that will be reduced until remain only a triangle.
-        @SuppressWarnings("unchecked")
-        ArrayList<Vertex> remaining = (ArrayList<Vertex>)polygon.clone();
         // ensure the Clockwise order
-        if (polygon.area() > 0) {
-            Collections.reverse(remaining);
+        ArrayList<Vertex> remaining;
+        if (polygon.inClockwise()) {
+            remaining = polygon.clone();
+        } else {
+            remaining = polygon.reverseClone();
+            init = (remaining.size() - init)%(remaining.size());
         }
         // sequential vertices (candidates triangles to be removed) 
         int iv0, iv1, iv2;
@@ -168,7 +169,6 @@ public class BasicTriangulation implements ArtGalleryAlgorithm {
             triangulated = true;
         return triangulated;
     }
-    
     
     private void coloring() {
         // reset current control
@@ -341,7 +341,9 @@ public class BasicTriangulation implements ArtGalleryAlgorithm {
     }
     
     public static void main(String[] args) {
+        
         Vertex v[] = ex2();
+
         int n = v.length;
         int i;
 

@@ -44,12 +44,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import distributed.ArtGalleryFactory;
+
 
 @SuppressWarnings("serial")
 public class Configuration extends JDialog {
     
     private final JPanel contentPanel = new JPanel();
     public int testCase = 0;
+    public int algorithm = 0;
     public boolean ok = false;
     public String[] testCases = {"Gallery 1", "Simple Gallery", "Gallery 2"};
     public String fileName = null;
@@ -75,13 +78,22 @@ public class Configuration extends JDialog {
         setModal(true);
         setAlwaysOnTop(true);
         setTitle("Distributed Art Gallery");
-        setBounds(100, 100, 305, 211);
+        setBounds(100, 100, 326, 237);
         GridBagLayout gridBagLayout = new GridBagLayout();
-        gridBagLayout.columnWidths = new int[] {120, 70};
-        gridBagLayout.rowHeights = new int[] {30, 30, 30, 30};
-        gridBagLayout.columnWeights = new double[]{0.0, 0.0};
-        gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0};
+        gridBagLayout.columnWidths = new int[] {30, 120, 120, 30};
+        gridBagLayout.rowHeights = new int[] {10, 10, 10, 10, 10, 10, 10};
+        gridBagLayout.columnWeights = new double[]{0.0, 1.0, 0.0};
+        gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         getContentPane().setLayout(gridBagLayout);
+        {
+            JLabel lblNewLabel = new JLabel("Configure the simulation");
+            GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
+            gbc_lblNewLabel.gridwidth = 2;
+            gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
+            gbc_lblNewLabel.gridx = 1;
+            gbc_lblNewLabel.gridy = 0;
+            getContentPane().add(lblNewLabel, gbc_lblNewLabel);
+        }
         contentPanel.setLayout(new FlowLayout());
         contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         GridBagConstraints gbc_contentPanel = new GridBagConstraints();
@@ -89,21 +101,8 @@ public class Configuration extends JDialog {
         gbc_contentPanel.insets = new Insets(0, 0, 5, 5);
         gbc_contentPanel.gridwidth = 2;
         gbc_contentPanel.gridx = 0;
-        gbc_contentPanel.gridy = 0;
+        gbc_contentPanel.gridy = 1;
         getContentPane().add(contentPanel, gbc_contentPanel);
-        {
-            JLabel lblNewLabel = new JLabel("Configure the simulation");
-            contentPanel.add(lblNewLabel);
-        }
-        {
-            JLabel lblChooseScenario = new JLabel("Choose scenario");
-            GridBagConstraints gbc_lblChooseScenario = new GridBagConstraints();
-            gbc_lblChooseScenario.fill = GridBagConstraints.HORIZONTAL;
-            gbc_lblChooseScenario.insets = new Insets(0, 0, 5, 5);
-            gbc_lblChooseScenario.gridx = 0;
-            gbc_lblChooseScenario.gridy = 1;
-            getContentPane().add(lblChooseScenario, gbc_lblChooseScenario);
-        }
         {
             final JComboBox<String> comboBox = new JComboBox<String>();
             comboBox.addItemListener(new ItemListener() {
@@ -111,24 +110,56 @@ public class Configuration extends JDialog {
                     testCase = comboBox.getSelectedIndex();
                 }
             });
+            {
+                JLabel lblChooseScenario = new JLabel("Scenario");
+                GridBagConstraints gbc_lblChooseScenario = new GridBagConstraints();
+                gbc_lblChooseScenario.anchor = GridBagConstraints.EAST;
+                gbc_lblChooseScenario.insets = new Insets(0, 0, 5, 5);
+                gbc_lblChooseScenario.gridx = 1;
+                gbc_lblChooseScenario.gridy = 2;
+                getContentPane().add(lblChooseScenario, gbc_lblChooseScenario);
+            }
             GridBagConstraints gbc_comboBox = new GridBagConstraints();
-            gbc_comboBox.anchor = GridBagConstraints.NORTHWEST;
+            gbc_comboBox.anchor = GridBagConstraints.WEST;
             gbc_comboBox.insets = new Insets(0, 0, 5, 5);
-            gbc_comboBox.gridx = 1;
-            gbc_comboBox.gridy = 1;
+            gbc_comboBox.gridx = 2;
+            gbc_comboBox.gridy = 2;
             getContentPane().add(comboBox, gbc_comboBox);
             comboBox.setModel(new DefaultComboBoxModel<String>(testCases));
+        }
+        {
+            JLabel lblChooseAlgorithm = new JLabel("Algorithm");
+            GridBagConstraints gbc_lblChooseAlgorithm = new GridBagConstraints();
+            gbc_lblChooseAlgorithm.anchor = GridBagConstraints.EAST;
+            gbc_lblChooseAlgorithm.insets = new Insets(0, 0, 5, 5);
+            gbc_lblChooseAlgorithm.gridx = 1;
+            gbc_lblChooseAlgorithm.gridy = 3;
+            getContentPane().add(lblChooseAlgorithm, gbc_lblChooseAlgorithm);
+        }
+        {
+            final JComboBox<String> comboBox = new JComboBox<String>();
+            comboBox.addItemListener(new ItemListener() {
+                public void itemStateChanged(ItemEvent e) {
+                    algorithm = comboBox.getSelectedIndex();
+                }
+            });
+            GridBagConstraints gbc_comboBox = new GridBagConstraints();
+            gbc_comboBox.anchor = GridBagConstraints.WEST;
+            gbc_comboBox.insets = new Insets(0, 0, 5, 5);
+            gbc_comboBox.gridx = 2;
+            gbc_comboBox.gridy = 3;
+            getContentPane().add(comboBox, gbc_comboBox);
+            comboBox.setModel(new DefaultComboBoxModel<String>(ArtGalleryFactory.algorithms));
         }
         {
             JPanel buttonPane = new JPanel();
             buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
             GridBagConstraints gbc_buttonPane = new GridBagConstraints();
-            gbc_buttonPane.insets = new Insets(0, 0, 5, 5);
             gbc_buttonPane.anchor = GridBagConstraints.NORTH;
             gbc_buttonPane.fill = GridBagConstraints.HORIZONTAL;
             gbc_buttonPane.gridwidth = 2;
-            gbc_buttonPane.gridx = 0;
-            gbc_buttonPane.gridy = 3;
+            gbc_buttonPane.gridx = 1;
+            gbc_buttonPane.gridy = 5;
             getContentPane().add(buttonPane, gbc_buttonPane);
             {
                 JButton okButton = new JButton("OK");

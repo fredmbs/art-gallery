@@ -29,13 +29,38 @@
 package distributed;
 
 import local.BasicTriangulation;
-//import local.FieldOfView;
+import local.FieldOfView;
 
 public class ArtGalleryFactory {
     
-    public ArtGalleryAlgorithm construct() {
-        //return new FieldOfView();
-        return new BasicTriangulation();
+    static public String[] algorithms = {
+        "Basic triangulation", 
+        "Field Of View (incomplete)"
+    };
+    
+    static public Class<?>[] classes  = {
+        BasicTriangulation.class,
+        FieldOfView.class
+    };
+    
+    private int algorithm = 0;
+    
+    public boolean setAlgorithm(int i) {
+        if (i >= 0 && i < algorithms.length) {
+            algorithm = i;
+            return true;                    
+        }
+        return false;
+    }
+    
+    protected ArtGalleryAlgorithm construct() {
+        try {
+            return (ArtGalleryAlgorithm)
+                    (ArtGalleryFactory.classes[algorithm].newInstance());
+        } catch (InstantiationException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
     
     public ArtGallery construct(Process p) {

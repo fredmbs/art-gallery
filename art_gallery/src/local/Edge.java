@@ -52,6 +52,12 @@ public class Edge {
         return v0.equals(e.v0) || v0.equals(e.v1) || 
                v1.equals(e.v0) || v1.equals(e.v1);
     }
+    
+    public Vertex getOpposite(Vertex v) {
+        if (v0.equals(v)) return v1;
+        if (v1.equals(v)) return v0;
+        return null;
+    }
 
     // cross product of 3D with z = 0
     private double cp(Vertex v2) {
@@ -67,8 +73,8 @@ public class Edge {
         double cp01 = this.cp(other.v1);
         double cp10 = other.cp(this.v0);
         double cp11 = other.cp(this.v1);
-        return (((cp00 * cp01) < Polygon.EPSILON) && 
-                ((cp10 * cp11) < Polygon.EPSILON));
+        return (((cp00 * cp01) < 0) && 
+                ((cp10 * cp11) < 0));
     }
     
     public boolean intersect(Vertex v) {

@@ -110,9 +110,9 @@ public class Triangle {
     }
     
     public boolean inCollision(Vertex p) {
-        boolean d0 = cp(p, v0, v1) < Polygon.EPSILON;
-        boolean d1 = cp(p, v1, v2) < Polygon.EPSILON;
-        boolean d2 = cp(p, v2, v0) < Polygon.EPSILON;
+        boolean d0 = cp(p, v0, v1) <= 0;//Polygon.EPSILON;
+        boolean d1 = cp(p, v1, v2) <= 0;//Polygon.EPSILON;
+        boolean d2 = cp(p, v2, v0) <= 0;//Polygon.EPSILON;
         return ((d0 == d1) && (d1 == d2));
     }
     

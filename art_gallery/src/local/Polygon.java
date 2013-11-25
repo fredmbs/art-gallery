@@ -29,54 +29,127 @@
 package local;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class Polygon extends ArrayList<Vertex> {
+public class Polygon implements Iterable<Vertex> {
     
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -49433842819633387L;
-
     // In case of float point operation:  
     final static double EPSILON = 0.000000001;
+
+    // Avoid race condition caused by 
+    // simultaneous method invocation originated by other applications.
+    private final ReentrantLock lock;
     
     private boolean closed;
     // Any order! The triangulation must to adjust the orientation.
+    ArrayList<Vertex> vertexes;
     
     public Polygon() {
         closed = false;
+        lock = new ReentrantLock();
+        vertexes = new ArrayList<Vertex>(); 
     }
     
     public boolean close() {
-            if (size() < 3)
+        lock.lock(); 
+        try {
+            if (vertexes.size() < 3)
                 return false;
             closed = true;
             return true;
+        } finally {
+            lock.unlock();
+        }
     }
     
-    @Override
     public boolean add(Vertex v) {
         if (closed) return false;
-        if (size() > 0 && v.equals(get(0))) {
-            return close();
+        lock.lock(); 
+        try {
+            if (vertexes.size() > 0 && v.equals(vertexes.get(0))) {
+                return close();
+            }
+            vertexes.add(v);
+            return true;
+        } finally {
+            lock.unlock();
         }
-        super.add(v);
-        return true;
     }
 
+    public Vertex get(int i) {
+        lock.lock(); 
+        try {
+            return vertexes.get(i);
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    public int size() {
+        lock.lock(); 
+        try {
+            return vertexes.size();
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    public boolean inClockwise() {
+        return (area() < 0);
+    }
+    
+    public boolean inCounterclockwise() {
+        return (area() > 0);
+    }
+    
+    public boolean isCollinear() {
+        return (area() == 0);
+    }
+    
+    public ArrayList<Vertex> reverseClone() {
+        lock.lock(); 
+        try {
+            ArrayList<Vertex> clone = new ArrayList<Vertex>();
+            clone.add(vertexes.get(0));
+            for (int i = vertexes.size() - 1; i > 0; i--)
+                clone.add(vertexes.get(i));
+            return clone;
+        } finally {
+            lock.unlock();
+        }
+    }
+    
+    public ArrayList<Vertex> clone() {
+        @SuppressWarnings("unchecked")
+        ArrayList<Vertex> clone = (ArrayList<Vertex>)vertexes.clone();
+        return clone;
+    }
+    
     public boolean isClosed() {
         return closed;
     }
     
     public double area()
     {
-        int n = size();
-        double area = 0.0d;
-        for(int p = n - 1, q = 0; q < n; p = q++) {
-            area += get(p).getX() * get(q).getY() - 
-                    get(q).getX() * get(p).getY();
+        lock.lock(); 
+        try {
+            int n = vertexes.size();
+            double area = 0.0d;
+            for(int p = n - 1, q = 0; q < n; p = q++) {
+                area += vertexes.get(p).getX() * vertexes.get(q).getY() - 
+                        vertexes.get(q).getX() * vertexes.get(p).getY();
+            }
+            return area / 2.0d;
+        } finally {
+            lock.unlock();
         }
-        return area / 2.0d;
+    }
+
+    @Override
+    public Iterator<Vertex> iterator() {
+        return vertexes.iterator();
     }    
+    
     
 }

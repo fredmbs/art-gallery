@@ -108,6 +108,8 @@ public class Main extends Application {
             cfg.setVisible(true);
             if (!cfg.ok) System.exit(0);
             
+            factory.setAlgorithm(cfg.algorithm);
+            
             switch(cfg.testCase) {
             case 0:
                 gallery1();
