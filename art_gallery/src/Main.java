@@ -37,6 +37,7 @@ import local.Vertex;
 import visualization.ArtGalleryApp;
 import visualization.ArtGalleryVisualFactory;
 import daj.Application;
+import daj.Network;
 import daj.Node;
 import distributed.ArtGalleryFactory;
 import distributed.Prog;
@@ -130,6 +131,9 @@ public class Main extends Application {
             }
         }
         this.repaint();
+        this.revalidate();
+        Network network = this.getNetwork();
+        network.redraw();
     }
     
     private void simpleGallery() {

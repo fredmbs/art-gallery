@@ -116,6 +116,13 @@ public class Triangle {
         return ((d0 == d1) && (d1 == d2));
     }
     
+    public boolean inCollision2(Vertex p) {
+        boolean d0 = cp(p, v0, v1) < Polygon.EPSILON;
+        boolean d1 = cp(p, v1, v2) < Polygon.EPSILON;
+        boolean d2 = cp(p, v2, v0) < Polygon.EPSILON;
+        return ((d0 == d1) && (d1 == d2));
+    }
+    
     public boolean hasVertex(Vertex p) {
         return (p.equals(v0) || p.equals(v1) || p.equals(v2));
     }

@@ -71,6 +71,8 @@ public abstract class Applic extends Applet implements ActionListener {
 		height = y;
 	}
 
+	public Network getNetwork() { return network; } 
+	
 	// --------------------------------------------------------------------------
 	//
 	// the following methods are used internally to control the application

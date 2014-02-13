@@ -77,6 +77,15 @@ public class Edge {
                 ((cp10 * cp11) < 0));
     }
     
+    public boolean intersect2(Edge other) {
+        double cp00 = this.cp(other.v0);
+        double cp01 = this.cp(other.v1);
+        double cp10 = other.cp(this.v0);
+        double cp11 = other.cp(this.v1);
+        return (((cp00 * cp01) <= 0) && 
+                ((cp10 * cp11) <= 0));
+    }
+    
     public boolean intersect(Vertex v) {
         double cp = this.cp(v);
         // if collinear and within the segment, them intersect. 
